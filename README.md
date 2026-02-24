@@ -141,7 +141,7 @@ npm run dev
 这个报错通常表示：Vercel 在构建/函数阶段仍使用 `@vercel/node@3`，它要求项目 Node 版本为 **18.x**。
 
 本仓库已做兼容修复：
-- `vercel.json` 的函数运行时改为 `nodejs18.x`
+- `vercel.json` 不再显式声明 `runtime`（避免 Vercel 对 runtime 格式校验报错）
 - `frontend/package.json` 与 `backend/package.json` 增加 `engines.node = 18.x`
 - 新增 `.nvmrc` 固定为 `18`
 
