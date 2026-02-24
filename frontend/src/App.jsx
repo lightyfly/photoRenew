@@ -22,6 +22,7 @@ function toErrorMessage(payload, fallback) {
 }
 
 export default function App() {
+  const [page, setPage] = useState('landing');
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,7 +50,10 @@ export default function App() {
         }
         return data;
       })
-      .then((data) => setUser(data.user))
+      .then((data) => {
+        setUser(data.user);
+        setPage('studio');
+      })
       .catch(() => {
         localStorage.removeItem('photoRenewToken');
         setToken('');
@@ -76,6 +80,7 @@ export default function App() {
       localStorage.setItem('photoRenewToken', data.token);
       setToken(data.token);
       setUser(data.user);
+      setPage('studio');
     } catch (authError) {
       setError(authError.message || '认证失败');
     } finally {
@@ -89,6 +94,7 @@ export default function App() {
     setUser(null);
     setResultUrl('');
     setError('');
+    setPage('landing');
   };
 
   const onSubmit = async (event) => {
@@ -144,7 +150,62 @@ export default function App() {
       <h1>Photo Renew 老照片修复</h1>
       <p className="subtitle">前后端分离 + Google Nano Banana / Gemini 2.5 Flash API</p>
 
-      {!user ? (
+      {!user && page === 'landing' && (
+        <>
+          <section className="hero card">
+            <h2>一键修复老照片，保留真实记忆</h2>
+            <p>
+              自动去划痕、去折痕、降噪、增强清晰度与色彩，支持用户账号体系与 5 次免费试用。
+            </p>
+            <div className="hero-actions">
+              <button type="button" onClick={() => setPage('auth')}>
+                立即试用
+              </button>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  setMode('register');
+                  setPage('auth');
+                }}
+              >
+                免费注册
+              </button>
+            </div>
+          </section>
+
+          <nav className="card nav-links">
+            <a href="#intro">产品说明</a>
+            <a href="#preview">效果预览</a>
+            <a href="#features">功能描述</a>
+          </nav>
+
+          <section id="intro" className="card">
+            <h3>产品说明</h3>
+            <p>Photo Renew 面向家庭用户、影像工作者和档案整理场景，帮助快速恢复有年代感的老照片。</p>
+          </section>
+
+          <section id="preview" className="card">
+            <h3>效果预览</h3>
+            <ul>
+              <li>可恢复泛黄、噪点、轻微模糊照片</li>
+              <li>尽量保持人物五官与身份特征不变</li>
+              <li>支持提示词微调修复风格</li>
+            </ul>
+          </section>
+
+          <section id="features" className="card">
+            <h3>功能描述</h3>
+            <ul>
+              <li>注册/登录用户系统，账号隔离</li>
+              <li>每位新用户赠送 5 次修复额度</li>
+              <li>上传原图后自动生成修复结果图并对比展示</li>
+            </ul>
+          </section>
+        </>
+      )}
+
+      {!user && page === 'auth' && (
         <form className="card" onSubmit={submitAuth}>
           <h2>{mode === 'login' ? '登录' : '注册'}</h2>
           <label className="label">邮箱</label>
@@ -165,9 +226,14 @@ export default function App() {
           <button type="button" className="secondary" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
             {mode === 'login' ? '没有账号？去注册' : '已有账号？去登录'}
           </button>
+          <button type="button" className="secondary" onClick={() => setPage('landing')}>
+            返回落地页
+          </button>
           {error && <p className="error">{error}</p>}
         </form>
-      ) : (
+      )}
+
+      {user && (
         <>
           <div className="card userbar">
             <p>
