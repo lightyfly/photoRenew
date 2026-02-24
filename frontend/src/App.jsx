@@ -2,6 +2,25 @@ import { useEffect, useMemo, useState } from 'react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
+async function parseResponse(response) {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    return response.json();
+  }
+
+  const text = await response.text();
+  return { error: text || '服务端返回了非 JSON 响应。' };
+}
+
+function toErrorMessage(payload, fallback) {
+  if (!payload) return fallback;
+  if (typeof payload === 'string') return payload;
+  if (typeof payload.error === 'string') return payload.error;
+  if (typeof payload.details === 'string') return payload.details;
+  return fallback;
+}
+
 export default function App() {
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
@@ -23,7 +42,13 @@ export default function App() {
     fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('登录已失效，请重新登录。'))))
+      .then(async (res) => {
+        const data = await parseResponse(res);
+        if (!res.ok) {
+          throw new Error(toErrorMessage(data, '登录已失效，请重新登录。'));
+        }
+        return data;
+      })
       .then((data) => setUser(data.user))
       .catch(() => {
         localStorage.removeItem('photoRenewToken');
@@ -43,9 +68,9 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await response.json();
+      const data = await parseResponse(response);
       if (!response.ok) {
-        throw new Error(data.error || '认证失败');
+        throw new Error(toErrorMessage(data, '认证失败'));
       }
 
       localStorage.setItem('photoRenewToken', data.token);
@@ -93,9 +118,9 @@ export default function App() {
         body: formData
       });
 
-      const data = await response.json();
+      const data = await parseResponse(response);
       if (!response.ok) {
-        throw new Error(data.error || '修复失败');
+        throw new Error(toErrorMessage(data, '修复失败'));
       }
 
       setResultUrl(`data:${data.mimeType};base64,${data.imageBase64}`);
