@@ -2,6 +2,19 @@ import { useEffect, useMemo, useState } from 'react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
+const landingHighlights = [
+  { title: '人物五官保持', desc: '重点保护人脸身份特征，避免“AI 换脸感”。' },
+  { title: '划痕折痕修复', desc: '去除老照片常见划痕、灰尘、折痕和霉斑。' },
+  { title: '自然上色增强', desc: '在保持年代气质的前提下做清晰度与色彩增强。' }
+];
+
+const landingSteps = [
+  { step: '01', title: '上传老照片', desc: '支持 JPG / PNG / WEBP，自动读取并预览。' },
+  { step: '02', title: '选择修复策略', desc: '可使用默认提示词，也可自定义高级指令。' },
+  { step: '03', title: 'AI 高清修复', desc: '调用 Nano Banana / Gemini Flash 图像能力生成结果。' },
+  { step: '04', title: '下载与对比', desc: '对比修复前后细节，满意后下载保存。' }
+];
+
 async function parseResponse(response) {
   const contentType = response.headers.get('content-type') || '';
 
@@ -147,67 +160,116 @@ export default function App() {
 
   return (
     <main className="container">
-      <h1>Photo Renew 老照片修复</h1>
-      <p className="subtitle">前后端分离 + Google Nano Banana / Gemini 2.5 Flash API</p>
+      <header className="topbar">
+        <div>
+          <h1>Photo Renew 老照片修复</h1>
+          <p className="subtitle">AI Old Photo Restoration Studio</p>
+        </div>
+        {!user && page !== 'auth' && (
+          <button type="button" onClick={() => setPage('auth')}>
+            立即试用
+          </button>
+        )}
+      </header>
 
       {!user && page === 'landing' && (
         <>
           <section className="hero card">
-            <h2>一键修复老照片，保留真实记忆</h2>
-            <p>
-              自动去划痕、去折痕、降噪、增强清晰度与色彩，支持用户账号体系与 5 次免费试用。
-            </p>
-            <div className="hero-actions">
-              <button type="button" onClick={() => setPage('auth')}>
-                立即试用
-              </button>
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => {
-                  setMode('register');
-                  setPage('auth');
-                }}
-              >
-                免费注册
-              </button>
+            <div>
+              <span className="badge">Nano Banana 2.5 Flash Powered</span>
+              <h2>专业级老照片修复，几秒看到前后对比</h2>
+              <p>
+                面向家庭回忆修复、影像工作室和档案数字化场景。上传照片后自动去划痕、降噪、增强清晰度，尽量保留人物真实面貌。
+              </p>
+              <div className="hero-actions">
+                <button type="button" onClick={() => setPage('auth')}>
+                  免费开始（赠送 5 次）
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => {
+                    setMode('register');
+                    setPage('auth');
+                  }}
+                >
+                  创建账号
+                </button>
+              </div>
+            </div>
+            <div className="hero-preview">
+              <div className="preview-box before">
+                <p>Before</p>
+              </div>
+              <div className="preview-box after">
+                <p>After</p>
+              </div>
             </div>
           </section>
 
           <nav className="card nav-links">
-            <a href="#intro">产品说明</a>
-            <a href="#preview">效果预览</a>
-            <a href="#features">功能描述</a>
+            <a href="#features">核心能力</a>
+            <a href="#showcase">效果预览</a>
+            <a href="#workflow">工作流程</a>
+            <a href="#cta">立即体验</a>
           </nav>
 
-          <section id="intro" className="card">
-            <h3>产品说明</h3>
-            <p>Photo Renew 面向家庭用户、影像工作者和档案整理场景，帮助快速恢复有年代感的老照片。</p>
-          </section>
-
-          <section id="preview" className="card">
-            <h3>效果预览</h3>
-            <ul>
-              <li>可恢复泛黄、噪点、轻微模糊照片</li>
-              <li>尽量保持人物五官与身份特征不变</li>
-              <li>支持提示词微调修复风格</li>
-            </ul>
-          </section>
-
           <section id="features" className="card">
-            <h3>功能描述</h3>
-            <ul>
-              <li>注册/登录用户系统，账号隔离</li>
-              <li>每位新用户赠送 5 次修复额度</li>
-              <li>上传原图后自动生成修复结果图并对比展示</li>
-            </ul>
+            <h3>核心能力</h3>
+            <div className="feature-grid">
+              {landingHighlights.map((item) => (
+                <article key={item.title} className="feature-item">
+                  <h4>{item.title}</h4>
+                  <p>{item.desc}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="showcase" className="card">
+            <h3>效果预览</h3>
+            <div className="showcase-grid">
+              <div className="showcase-card">
+                <h4>人像修复</h4>
+                <p>对皮肤纹理、发丝与眼部细节进行自然增强，减少 AI 感。</p>
+              </div>
+              <div className="showcase-card">
+                <h4>黑白上色</h4>
+                <p>保持时代氛围的基础上进行色彩还原，减少“过饱和”问题。</p>
+              </div>
+              <div className="showcase-card">
+                <h4>破损补全</h4>
+                <p>对边缘缺损、污渍区域进行语义补全，保留主体完整性。</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="workflow" className="card">
+            <h3>4 步完成修复</h3>
+            <div className="step-grid">
+              {landingSteps.map((item) => (
+                <article key={item.step} className="step-item">
+                  <span>{item.step}</span>
+                  <h4>{item.title}</h4>
+                  <p>{item.desc}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="cta" className="card cta">
+            <h3>现在就开始修复你的珍贵回忆</h3>
+            <p>注册即送 5 次免费修复额度，无需信用卡。</p>
+            <button type="button" onClick={() => setPage('auth')}>
+              进入试用
+            </button>
           </section>
         </>
       )}
 
       {!user && page === 'auth' && (
-        <form className="card" onSubmit={submitAuth}>
-          <h2>{mode === 'login' ? '登录' : '注册'}</h2>
+        <form className="card auth-card" onSubmit={submitAuth}>
+          <h2>{mode === 'login' ? '登录账号' : '注册账号'}</h2>
           <label className="label">邮箱</label>
           <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
 
