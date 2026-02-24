@@ -134,3 +134,17 @@ npm run dev
 4. 如你之前改过 Build & Output Settings，建议清空为默认（让 `vercel.json` 接管）。
 
 > 注意：当前示例将用户数据存储在 `backend/data/users.json`。Vercel Serverless 是无状态环境，生产建议接入数据库（如 PostgreSQL / Redis / Supabase）以持久化用户与额度数据。
+
+
+### 部署报错 `Found invalid Node.js Version: "24.x"` 怎么办？
+
+这是因为之前配置里使用了 `@vercel/node@3` 运行时，它要求项目 Node 版本为 18.x。
+
+本仓库现已改为在 `vercel.json` 使用 `nodejs20.x`：
+- 不再依赖 `@vercel/node@3` 的版本约束
+- 避免你在 Vercel Project Settings 里被迫改成 18.x
+
+如果你仍看到旧报错，请确保：
+1. 已部署到包含最新 `vercel.json` 的 commit；
+2. 触发一次 **Redeploy (without cache)**；
+3. Vercel Dashboard 没有遗留旧的 Build/Functions 覆盖配置。
