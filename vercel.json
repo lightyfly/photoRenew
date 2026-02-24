@@ -4,18 +4,18 @@
   "buildCommand": "npm run build --prefix frontend",
   "outputDirectory": "frontend/dist",
   "functions": {
-    "api/index.js": {
+    "api/index.cjs": {
       "maxDuration": 60
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "destination": "/api/index.cjs"
     },
     {
       "source": "/health",
-      "destination": "/api/index.js"
+      "destination": "/api/index.cjs"
     }
   ]
 }
