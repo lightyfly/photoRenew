@@ -138,13 +138,15 @@ npm run dev
 
 ### 部署报错 `Found invalid Node.js Version: "24.x"` 怎么办？
 
-这是因为之前配置里使用了 `@vercel/node@3` 运行时，它要求项目 Node 版本为 18.x。
+这个报错通常表示：Vercel 在构建/函数阶段仍使用 `@vercel/node@3`，它要求项目 Node 版本为 **18.x**。
 
-本仓库现已改为在 `vercel.json` 使用 `nodejs20.x`：
-- 不再依赖 `@vercel/node@3` 的版本约束
-- 避免你在 Vercel Project Settings 里被迫改成 18.x
+本仓库已做兼容修复：
+- `vercel.json` 的函数运行时改为 `nodejs18.x`
+- `frontend/package.json` 与 `backend/package.json` 增加 `engines.node = 18.x`
+- 新增 `.nvmrc` 固定为 `18`
 
-如果你仍看到旧报错，请确保：
-1. 已部署到包含最新 `vercel.json` 的 commit；
-2. 触发一次 **Redeploy (without cache)**；
-3. Vercel Dashboard 没有遗留旧的 Build/Functions 覆盖配置。
+你在 Vercel 还需要确认：
+1. Project Settings → Node.js Version 设为 **18.x**；
+2. 部署的是最新 commit（不是日志里旧的 `3defd16`）；
+3. 执行一次 **Redeploy (without cache)**；
+4. 没有 Dashboard 覆盖 `Build & Output Settings`。
