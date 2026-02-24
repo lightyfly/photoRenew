@@ -1,0 +1,22 @@
+{
+  "framework": "vite",
+  "installCommand": "npm install --prefix frontend && npm install --prefix backend",
+  "buildCommand": "npm run build --prefix frontend",
+  "outputDirectory": "frontend/dist",
+  "functions": {
+    "backend/src/index.js": {
+      "runtime": "@vercel/node@3.0.0",
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/src/index.js"
+    },
+    {
+      "source": "/health",
+      "destination": "/backend/src/index.js"
+    }
+  ]
+}
