@@ -95,7 +95,7 @@ npm run dev
 1. 在 Vercel 新建项目，直接指向仓库根目录（Root Directory 留空或 `.`）。
 2. 使用仓库根目录的 `vercel.json`（本仓库已提供）：
    - 前端由 `frontend/package.json` 构建静态站点
-   - 后端由 `backend/src/index.js` 提供 `/api/*`
+   - 后端通过 `api/index.js` 入口（转发到 `backend/src/index.js`）提供 `/api/*`
 3. 在 Vercel 项目环境变量里配置：
    - `GOOGLE_API_KEY`
    - `GOOGLE_MODEL`（可选）
@@ -121,7 +121,7 @@ npm run dev
 3. **前端部署成功但请求后端地址错误**：之前默认值是 `http://localhost:3001`，在 Vercel 浏览器环境会失效。
 
 本次已修复：
-- 新增仓库根 `vercel.json`，支持单项目路由前端 + `/api`。
+- 新增仓库根 `vercel.json` + `api/index.js`（Vercel Serverless 规范目录），支持单项目路由前端 + `/api`。
 - 前端默认 API 地址改为同域名（空字符串 + `/api/*`），避免线上请求 `localhost`。
 
 
