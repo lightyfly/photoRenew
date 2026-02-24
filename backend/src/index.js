@@ -20,6 +20,11 @@ const upload = multer({
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dataFilePath = path.join(__dirname, '../data/users.json');
+const isVercel = Boolean(process.env.VERCEL);
+
+if (!globalThis.__PHOTO_RENEW_MEM_DB__) {
+  globalThis.__PHOTO_RENEW_MEM_DB__ = { users: [] };
+}
 
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
@@ -34,12 +39,21 @@ async function ensureDataFile() {
 }
 
 async function readDb() {
+  if (isVercel) {
+    return globalThis.__PHOTO_RENEW_MEM_DB__;
+  }
+
   await ensureDataFile();
   const raw = await fs.readFile(dataFilePath, 'utf8');
   return JSON.parse(raw);
 }
 
 async function writeDb(db) {
+  if (isVercel) {
+    globalThis.__PHOTO_RENEW_MEM_DB__ = db;
+    return;
+  }
+
   await fs.writeFile(dataFilePath, JSON.stringify(db, null, 2), 'utf8');
 }
 
@@ -58,27 +72,31 @@ function createToken() {
 }
 
 async function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  try {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized: missing token.' });
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized: missing token.' });
+    }
+
+    const db = await readDb();
+    const user = db.users.find((item) => item.token === token);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized: invalid token.' });
+    }
+
+    req.user = user;
+    req.db = db;
+    return next();
+  } catch (error) {
+    return res.status(500).json({ error: 'Auth middleware failed.', details: error.message });
   }
-
-  const db = await readDb();
-  const user = db.users.find((item) => item.token === token);
-
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized: invalid token.' });
-  }
-
-  req.user = user;
-  req.db = db;
-  return next();
 }
 
 app.get('/health', (_, res) => {
-  res.json({ ok: true, service: 'photo-renew-backend' });
+  res.json({ ok: true, service: 'photo-renew-backend', storage: isVercel ? 'memory' : 'file' });
 });
 
 app.post('/api/auth/register', async (req, res) => {
@@ -251,7 +269,7 @@ app.post('/api/restore', authMiddleware, upload.single('image'), async (req, res
   }
 });
 
-if (!process.env.VERCEL) {
+if (!isVercel) {
   app.listen(port, () => {
     console.log(`Photo Renew backend running on http://localhost:${port}`);
   });
